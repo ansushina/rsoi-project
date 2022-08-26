@@ -38,7 +38,7 @@ export class UsersService {
             return {
                 ...res.rows[0],
                 id: undefined,
-            };
+            } as User;
     }
 
     public async getUserByLogin(login: string) {

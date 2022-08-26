@@ -1,4 +1,4 @@
-import { Body, ConflictException, Controller, Delete, Param, Patch, Post } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Delete, Param, Patch, Post } from '@nestjs/common';
 import { User } from 'src/models/user';
 import { UsersService } from 'src/users/services/users/users.service';
 
@@ -23,6 +23,10 @@ export class UsersController {
 
         if (sameLoginUser) {
             throw new ConflictException('User with same login already exists');
+        }
+
+        if(user.user_role !== 'user') {
+            throw new BadRequestException('Cant create user with this role');
         }
 
         return await this.users.createUser(user);

@@ -45,7 +45,7 @@ export class SessionsService {
   public async getSessionByToken(token: string) {
     const query = `
         SELECT * FROM ${this.tableName}
-        WHERE token='${token}'
+        WHERE jwt='${token}'
         LIMIT 1;
       `;
 
@@ -78,7 +78,7 @@ export class SessionsService {
     Logger.log(JSON.stringify(session));
     const query = `
       INSERT INTO ${this.tableName} (uid, user_uid,  user_role, jwt)
-        VALUES ('${session.uid}', '${session.user_uid}', '${session.user_role}', ${session.jwt});
+        VALUES ('${session.uid}', '${session.user_uid}', '${session.user_role}', '${session.jwt}');
       `;
     try {
       const result = await this.pg.query(query);
