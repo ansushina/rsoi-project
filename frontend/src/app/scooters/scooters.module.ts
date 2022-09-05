@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ScootersPageComponent } from './components/scooters-page/scooters-page.component';
+import { ScootersRoutingModule } from './scooters-routing.module';
 
 
 
@@ -9,7 +10,8 @@ import { ScootersPageComponent } from './components/scooters-page/scooters-page.
     ScootersPageComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    ScootersRoutingModule,
   ]
 })
 export class ScootersModule { }
