@@ -1,4 +1,5 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
+import { Scooter } from 'src/models/scooter';
 import { ScooterService } from 'src/scooter/services/scooter/scooter.service';
 
 @Controller('scooters')
@@ -14,7 +15,7 @@ export class ScooterController {
         @Query('size') pageSize: number,
         @Query('page') page: number
     ) {
-        const items =  (await this.scooters.getAllScooters(page, pageSize)).map(h => this.scooters.scooterToScooterDTO(h));
+        const items =  (await this.scooters.getAllScooters(page, pageSize)).filter(s => s.availability).map(h => this.scooters.scooterToScooterDTO(h));
         const count  = await this.scooters.getScootersCount();
         return {
             page: page? parseInt(page.toString()) : 1,
@@ -29,5 +30,13 @@ export class ScooterController {
         @Param('scooterUid') uid: string,  
     ) {
         return this.scooters.scooterToScooterDTO( await this.scooters.getScooterByUid(uid));
+    }
+
+    @Patch('/:scooterUid')
+    async updateScooter(
+        @Param('scooterUid') uid: string,
+        @Body() scooter: Scooter,
+    ) {
+        return this.scooters.updateScooterStatus(uid, scooter.availability);
     }
 }

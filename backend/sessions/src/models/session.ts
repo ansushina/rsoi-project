@@ -1,5 +1,15 @@
 import { UserRole } from "./user";
 
+export interface SessionDto {
+
+    user_role: UserRole; 
+
+    password: string;
+
+    login: string;
+
+}
+
 export interface Session {
     id?: string;
     
@@ -11,6 +21,7 @@ export interface Session {
 
     jwt: string;
 }
+
 
 // CREATE TABLE sessions
 // (

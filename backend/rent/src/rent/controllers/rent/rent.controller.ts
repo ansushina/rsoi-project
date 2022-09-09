@@ -1,6 +1,7 @@
 import { BadRequestException, Body, Controller, Delete, Get, HttpException, Logger, Param, Patch, Post, Req } from '@nestjs/common';
 import { Rent } from 'src/models/rent';
 import { RentService } from 'src/rent/services/rent/rent.service';
+import { Request } from 'express';
 
 @Controller('rent')
 export class RentController {
@@ -33,7 +34,9 @@ export class RentController {
     ) {
         Logger.log(JSON.stringify(request.headers))
         const username: string = request.headers['x-user-name']?.toString();
-        if (!username) throw new  BadRequestException('username must be provided');
+        if (!username) {
+            return await this.rents.getAllRents();
+        }
         const Rents =  await this.rents.getUserRents(username);
         const items = [];
         for (const r of Rents) {
@@ -41,6 +44,24 @@ export class RentController {
         }
         return items;
     }
+
+    @Get('/scooter')
+    async getScooterRents(
+        @Req() request: Request
+    ) {
+        Logger.log(JSON.stringify(request.headers))
+        const scooter: string = request.headers['x-scoorer-name']?.toString();
+        if (!scooter) {
+            return await this.rents.getAllRents();
+        }
+        const Rents =  await this.rents.getScooterRents(scooter);
+        const items = [];
+        for (const r of Rents) {
+            items.push(r);
+        }
+        return items;
+    }
+
 
     @Get('/:RentUid') 
     async getOneRent(
@@ -102,10 +123,11 @@ export class RentController {
     ) {
         const username =  request.headers['X-User-Name'].toString();
         const r = await this.rents.getRentById(uid);
-        if (r.username === username) {
+        if (r.user_uid === username) {
             await this.rents.deleteRent(uid)
         } else {
             throw new HttpException('Username not equal', 403);
         }
     }
+    
 }

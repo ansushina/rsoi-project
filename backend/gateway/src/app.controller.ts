@@ -1,15 +1,25 @@
-import { BadRequestException, Body, Controller, Delete, Get, HttpCode, Logger, Param, Post, Query, Req, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, ForbiddenException, Get, HttpCode, InternalServerErrorException, Logger, Param, Post, Query, Req, ServiceUnavailableException, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Payment } from './models/payment';
 import { v4 as uuidv4 } from 'uuid';
 import { ScootersService } from './services/scooters/scooters.service';
 import { Request } from 'express';
+import { User } from './models/user';
+import { AuthService } from './services/auth/auth.service';
+import { SessionDto } from './models/session';
+import { Roles, RolesGuard } from './utils/guards/roles.guard';
+import { RentService } from './services/rent/rent.service';
+import { PaymentService } from './services/payment/payment.service';
+import  moment  from 'moment';
 
 @Controller()
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    private readonly scooters: ScootersService
+    private readonly scooters: ScootersService,
+    private readonly auth: AuthService,
+    private readonly rent: RentService,
+    private readonly payment: PaymentService,
     // @InjectQueue('queue1') private queue: Queue
   ) { }
 
@@ -19,201 +29,215 @@ export class AppController {
   }
 
 
+  // регистрация 
+  @Post('/users')
+  async registerUser(
+    @Body() user: User,
+  ) {
+    return this.auth.createUser(user);
+  }
+
+  // вход
+  @Post('/sessions')
+  async createSession(
+    @Body() session: SessionDto,
+  ) {
+    return this.auth.createSession(session);
+  }
+
+  // выход
+  @Delete('/sessions/:sessionId')
+  async seleteSession(
+    @Param('sessionId') sessionId: string,
+  ) {
+    return this.auth.deleteSession(sessionId);
+  }
+
+
   // а зачем мне все?
+  @UseGuards(RolesGuard)
+  @Roles('user')
   @Get('/scooters')
   async getScooters(
     @Query('page') page: number,
     @Query('size') size: number
   ) {
-    return this.scooters.getScooters(page, size).toPromise();
+    // const rent =  await this.rent.getRent();
+    const scooters = await this.scooters.getScooters(page, size);
+
+    return scooters;
   }
 
 
-  // доступные скутеры
-  // @Get('/scooters/available')
 
-
-  @Get('/me')
-  async getMe(
-    @Req() request: Request
-  ) {
-    // достать токен
-    const username: string = request.headers['x-user-name']?.toString();
-    if (!username) throw new  BadRequestException('username must be provided'); 
-
-    // получить поездки
-    // const reservations = await this.getAllReservations(username);
-
-    // return {
-    //   reservations,
-    //   loyalty: {
-    //     status: loyality.status,
-    //     discount: loyality.discount,
-    //   }
-    // }
-  }
-
-
-  // private async getAllReservations(username) {
-  //   const reservations = await this.reservation.getUserReservations(username).toPromise();
+  @Get('/rent')
+  async getUserRents (
     
-  //   const items = [];
-  //   for (const r of reservations) {
-  //     const p = await this.payment.getPayment(username, r.paymentUid).toPromise(); 
-  //     items.push({
-  //       ...r,
-  //       startDate: moment(new Date(r.startDate)).format('YYYY-MM-DD'),
-  //       endDate: moment(new Date(r.endDate)).format('YYYY-MM-DD'),
-  //       paymentUid: undefined, 
-  //       payment: p ? {
-  //         status: p.status,
-  //         price: p.price,
-  //       } : {}
-  //     })
-  //   }
-  //   return items;
-  // }
+    @Req() request: Request,
+  ) {
+    const session = await this.auth.getSessionByToken(request.headers['token']?.toString())
 
-  // пусть будут все проверим последнюю
-  @Get('/reservations')
-  async getReservations(
-    @Req() request: Request
-  ) { 
-    // const username: string = request.headers['x-user-name']?.toString();
-    // if (!username) throw new  BadRequestException('username must be provided'); 
-    // return this.getAllReservations(username);
+    return await this.rent.getUserRent(session.user_uid);
   }
+
 
   // аренда самоката
-  @Post('/reservations/')
+  @Post('/rent/')
   @HttpCode(200)
-  async createReservation(
+  async createRent(
     @Req() request: Request,
     @Body('startDate') startDate: string,
     @Body('endDate') endDate: string,
-    @Body('hotelUid') hotelUid: string,
-  ) { 
+    @Body('scooterUid') scooterUid: string,
+  ) {
 
-    // проверка токена 
-    const username: string = request.headers['x-user-name']?.toString();
-    if (!username) throw new  BadRequestException('username must be provided'); 
+    const session = await this.auth.getSessionByToken(request.headers['token']?.toString())
+
+    const scooter = await this.scooters.getScooterById(scooterUid);
+
+    if (!scooter) {
+      throw new Error('Самокат не найден');
+    }
+
+    if (scooter.availability != true) {
+      throw new BadRequestException('Самокат уже используется');
+    }
+
     
-    // get скутер 
-
-    // const hotel = await  this.reservation.getHotel(hotelUid).toPromise();
-    // if (!hotel) {
-    //   throw new ServiceUnavailableException('Reservation Service unavailable')
-    // }
-
-    // Logger.log(JSON.stringify(hotel))
-
-
-    // payment 
-
-    // const payment = {
-    //   payment_uid: uuidv4(),
-    //   status: 'PAID',
-    //   price: resultPay,
-    // } as Payment;
-
-    // const p = await this.payment.createPayment(username, payment).toPromise();
-    // if (!p) {
-    //   throw new ServiceUnavailableException('Payment Service unavailable');
-    // }
+    const userRents = await this.rent.getUserRent(session.user_uid);
     
-    // Logger.log(JSON.stringify(p))
-    // reservation
+    
+    // const isScooredRented = scooterRents.find(rent => new Date(rent.end_data) > new Date());
+    const isUserHasRent = userRents.find(rent => new Date(rent.end_data) > new Date());
+    
+    // if (isScooredRented) {
+      //   throw new BadRequestException('Самокат уже арендован');
+      // } 
+      
+      if (isUserHasRent) {
+        throw new BadRequestException('У пользователя уже есть арендованный самокат');
+      }
 
-    // const reservation = {
-    //   reservation_uid: uuidv4(),
-    //   hotel_id: hotelUid,
-    //   payment_uid: payment.payment_uid,
-    //   status: 'PAID',
-    //   start_date: startDate,
-    //   end_data: endDate,
-    //   username,
-    // } as Reservation;
 
-    // // Logger.log(JSON.stringify(reservation))
+      
+    const resultSU =  await this.scooters.updateScooterStatus(scooterUid, false)
 
-    // const r = await this.reservation.createReservation(username, reservation).toPromise();
+    if (!resultSU) {
+      throw new InternalServerErrorException('Не удалось изменить статус самоката');
+    } 
+    // создать ренту
+
+
+
+    //  проверка удачности
+
+
+    // создать оплату 
+
+    const paymentDto = { payment_uid: uuidv4(), status: 'PAID' , price: scooter.price } as Payment 
+
+    const payment =  await this.payment.createPayment(session.user_uid, paymentDto);
+
+    if (!payment) {
+      await this.scooters.updateScooterStatus(scooterUid, true);
+      throw new InternalServerErrorException('Не удалось оплатить');
+    }
+
+
+
+    const newRent = {
+      user_uid: session.user_uid,
+      scooter_uid: scooter.uid,
+      payment_uid: payment.payment_uid,
+      uid: uuidv4(),
+      status: 'started',
+      start_date: startDate,
+      end_data: endDate,
+    };
+
+    const r = await this.rent.createRent(newRent);
+
+    if (!r) {
+      await this.payment.changePaymentState(session.user_uid, payment.payment_uid, 'CANCELED');
+      await this.scooters.updateScooterStatus(scooterUid, true);
+      throw new InternalServerErrorException('Не удалось оплатить');
+    }
 
     // // Logger.log(JSON.stringify(r))
-    // return {
-    //   ...r, 
-    //   startDate: moment(new Date(r.startDate)).format('YYYY-MM-DD'),
-    //   endDate: moment(new Date(r.endDate)).format('YYYY-MM-DD'),
-    //   discount: loyalty.discount,
-    //   payment: {
-    //     status: payment.status,
-    //     price: payment.price,
-    //   }
-    // }
+    return {
+      ...r, 
+      startDate: moment(new Date(r.startDate)).format('YYYY-MM-DD'),
+      endDate: moment(new Date(r.endDate)).format('YYYY-MM-DD'),
+      payment: {
+        status: payment.status,
+        price: payment.price,
+      }
+    }
   }
 
-  // @Get('/reservations/:reservationId')
-  // async getReservationById(
-  //   @Param('reservationId') uid: string,
-  //   @Req() request: Request
-  // ) {
-  //   const username: string = request.headers['x-user-name']?.toString();
-  //   if (!username) throw new  BadRequestException('username must be provided'); 
+  @Get('/rent/:rentId')
+  async getRentById(
+    @Param('rentId') uid: string,
+    @Req() request: Request
+  ) {
+    const session = await this.auth.getSessionByToken(request.headers['token']?.toString())
 
-  //   const r = await this.reservation.getReservation(username, uid).toPromise(); 
-  //   const p = await this.payment.getPayment(username, r.paymentUid).toPromise(); 
+    const r = await this.rent.getRentById(uid);
+    if (r.user_uid !== session.user_uid) {
+      throw new ForbiddenException('Этот заказ не принадлежит пользователю');
+    }
+    const p = await this.payment.getPayment(session.user_uid, r.payment_uid); 
 
-  //   return {
-  //     ...r,
-  //     startDate: moment(new Date(r.startDate)).format('YYYY-MM-DD'),
-  //     endDate: moment(new Date(r.endDate)).format('YYYY-MM-DD'),
-  //     paymentUid: undefined, 
-  //     payment: p ? {
-  //       status: p.status,
-  //       price: p.price,
-  //     } : {}
-  //   }
-  //  }
+    return {
+      ...r,
+      startDate: moment(new Date(r.start_date)).format('YYYY-MM-DD'),
+      endDate: moment(new Date(r.end_data)).format('YYYY-MM-DD'),
+      paymentUid: undefined, 
+      payment: p ? {
+        status: p.status,
+        price: p.price,
+      } : {}
+    }
+   }
 
   // Возможно стоит заменить на patch
-  @Delete('/reservations/:reservationId')
+  @Delete('/rent/:rentId')
   @HttpCode(204)
-  async deleteReservation(
-    @Param('reservationId') uid: string,
+  async deleteRent(
+    @Param('rentId') uid: string,
     @Req() request: Request
-  ) { 
-    // const username: string = request.headers['x-user-name']?.toString();
-    // if (!username) throw new  BadRequestException('username must be provided'); 
+  ) {
+    
+    const session = await this.auth.getSessionByToken(request.headers['token']?.toString())
 
-    // // status reservation canceled
+    const r = await this.rent.getRentById(uid);
+    if (r.user_uid !== session.user_uid) {
+      throw new ForbiddenException('Этот заказ не принадлежит пользователю');
+    }
 
-    // const r = await this.reservation.setReservationStatus(username, uid, 'CANCELED').toPromise();
+          
+    const resultSU =  await this.scooters.updateScooterStatus(r.scooter_uid, true)
 
-    // if (!r) {
-    //   throw new ServiceUnavailableException('Reservation Service unavailable')
-    // }
+    if (!resultSU) {
+      throw new InternalServerErrorException('Не удалось изменить статус самоката');
+    } 
+    // создать ренту
 
-    // // payment cancelled
+    // // status rent canceled
 
-    // const p = await this.payment.changePaymentState(username, r.paymentUid, 'CANCELED').toPromise();
+    const rent = await this.rent.setRentStatus(session.user_uid, uid, 'CANCELED').toPromise();
+    
+    
+        if (!rent) {
+          throw new ServiceUnavailableException('Rent Service unavailable')
+        }
 
-    // if (!p) {
-    //   throw new ServiceUnavailableException('Payment Service unavailable')
-    // }
 
-    // //loylty - 1 
+    const p = await this.payment.changePaymentState(session.user_uid, rent.payment_uid, 'CANCELED');
 
-    // Logger.log('try to add job')
-    // this.queue.add('job1',
-    // {
-    //   try: 1, 
-    //   creationTime: Date.now(),
-    //   request: 'updateLoyalty', 
-    //   requestData: {
-    //     username, 
-    //     type: 'dec',
-    //   }
-    // });
-    // const l = await this.loyalty.updateLoyaltyCount(username, 'dec').toPromise();
-    // Logger.log(JSON.stringify(l))
+    if (!p) {
+      throw new ServiceUnavailableException('Payment Service unavailable')
+    }
+
   }
 }

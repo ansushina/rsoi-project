@@ -1,4 +1,4 @@
-import { BadRequestException, Body, ConflictException, Controller, Delete, Param, Patch, Post } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Delete, Get, NotFoundException, Param, Patch, Post } from '@nestjs/common';
 import { User } from 'src/models/user';
 import { UsersService } from 'src/users/services/users/users.service';
 
@@ -30,6 +30,18 @@ export class UsersController {
         }
 
         return await this.users.createUser(user);
+    }
+
+    
+    @Get('/:userId')
+    public async getUser(
+        @Param('userId') userId: string,
+    ) {
+        const user =  await this.users.getUserByUid(userId);
+        if (!user) {
+            throw new NotFoundException();
+        }
+        return user;
     }
 
     @Delete('/:userId')

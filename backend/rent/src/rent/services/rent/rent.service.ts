@@ -20,6 +20,16 @@ export class RentService {
 
     private pg: Client;
 
+    async getAllRents(): Promise<Rent[]> {
+      const query = `
+      SELECT * FROM ${this.tableName};
+    `;
+
+      const res = await this.pg.query(query);
+      return res.rows;
+  }
+
+
 
     async getUserRents(user_uid: string): Promise<Rent[]> {
         const query = `
@@ -30,6 +40,17 @@ export class RentService {
         const res = await this.pg.query(query);
         return res.rows;
     }
+
+    async getScooterRents(scooter_uid: string): Promise<Rent[]> {
+      const query = `
+      SELECT * FROM ${this.tableName}
+      WHERE scooter_uid='${scooter_uid}';
+    `;
+
+      const res = await this.pg.query(query);
+      return res.rows;
+  }
+
 
     async getRentById(uid: string): Promise<Rent> {
         const query = `
@@ -49,7 +70,7 @@ export class RentService {
         Logger.log(JSON.stringify(r))
         const query = `
         INSERT INTO ${this.tableName} (uid, user_uid, payment_uid, scooter_uid, status, start_date, end_data)
-          VALUES ('${r.uid}', '${r.user_uid}', '${r.payment_uid}', ${r.scooter_uid}, '${r.status}',timestamp '${r.start_date}',timestamp '${r.end_data}');
+          VALUES ('${r.uid}', '${r.user_uid}', '${r.payment_uid}', '${r.scooter_uid}', '${r.status}',timestamp '${r.start_date}',timestamp '${r.end_data}');
         `;      
       try {
         const result = await this.pg.query(query);

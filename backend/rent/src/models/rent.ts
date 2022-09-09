@@ -8,7 +8,7 @@ export class Rent {
 
   payment_uid: string;
 
-  scooter_uid: number;
+  scooter_uid: string;
 
   status: string;
 

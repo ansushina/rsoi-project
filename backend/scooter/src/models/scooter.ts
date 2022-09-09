@@ -13,6 +13,8 @@ export class Scooter {
   stars: number;
    
   price: number;
+
+  availability: boolean;
 }
 
 // CREATE TABLE scooters
@@ -23,5 +25,6 @@ export class Scooter {
 //      model TEXT,
 //      adress TEXT,
 //      stars REAL,
-//     price INT
+//     price INT,
+//    availability BOOL,
 // );

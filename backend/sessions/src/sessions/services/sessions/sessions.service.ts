@@ -82,7 +82,7 @@ export class SessionsService {
       `;
     try {
       const result = await this.pg.query(query);
-      return this.getSessionByUserId(session.user_uid)
+      return this.getSessionByToken(session.jwt)
     } catch (error) {
       console.log(error);
       throw new Error("Failed to insert ruser to table!");

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { PgService } from 'src/postgres/pg.service';
 
 
@@ -42,6 +42,7 @@ export class ScooterService {
       `;
 
         const res = await this.pg.query(query);
+        Logger.log(JSON.stringify(res))
         return res.rows;
 
     }
@@ -72,5 +73,21 @@ export class ScooterService {
             throw new Error("Not Found!");
         else
             return res.rows[0];
+    }
+
+
+    async updateScooterStatus(id: string, availability: boolean) {
+        const query = `
+        UPDATE ${this.tableName} 
+        SET availability='${availability}'
+        WHERE uid='${id}';
+        `;
+        try {
+            await this.pg.query(query);
+            return this.getScooterByUid(id);
+        } catch (error) {
+            console.log(error);
+            throw new InternalServerErrorException("Failed to update scooter!");
+        }
     }
 }
