@@ -3,6 +3,10 @@ import { CommonModule } from '@angular/common';
 import { AuthPageComponent } from './components/auth-page/auth-page.component';
 import { RegisterPageComponent } from './components/register-page/register-page.component';
 import { AuthRoutingModule } from './auth-routing.module';
+import {MatInputModule} from '@angular/material/input';
+import {MatButtonModule} from '@angular/material/button';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 
 
@@ -13,7 +17,12 @@ import { AuthRoutingModule } from './auth-routing.module';
   ],
   imports: [
     CommonModule,
-    AuthRoutingModule
+    AuthRoutingModule,
+    MatInputModule,
+    MatButtonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    HttpClientModule
   ]
 })
 export class AuthModule { }

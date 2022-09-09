@@ -1,1 +1,21 @@
-<p>register-page works!</p>
+<div class="register-container  mat-elevation-z8">
+  <mat-form-field appearance="fill">
+    <mat-label>Логин</mat-label>
+    <input matInput>
+  </mat-form-field>
+  <mat-form-field  appearance="fill">
+    <mat-label>Пароль</mat-label>
+    <input matInput type="password">
+  </mat-form-field>
+
+  <mat-form-field  appearance="fill">
+    <mat-label>Повторение пароля</mat-label>
+    <input matInput type="password">
+  </mat-form-field>
+
+
+  <button mat-raised-button color="primary">Зарегистрироваться</button>
+
+
+  <a [routerLink]="'/auth'">Войти</a>
+</div>

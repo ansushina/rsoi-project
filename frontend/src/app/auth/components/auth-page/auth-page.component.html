@@ -1,1 +1,19 @@
-<p>auth-page works!</p>
+
+<div class="auth-container mat-elevation-z8" [formGroup]="authForm">
+  <mat-form-field appearance="fill" >
+    <mat-label>Логин</mat-label>
+    <input matInput required formControlName="login">
+  </mat-form-field>
+  <mat-form-field  appearance="fill">
+    <mat-label>Пароль</mat-label>
+    <input matInput type="password" required formControlName="password">
+  </mat-form-field>
+
+
+  <button mat-raised-button color="primary" (click)="login()">
+    Войти
+  </button>
+
+  <a [routerLink]="'/auth/sign-up'">Зарегистрироваться</a>
+</div>
+

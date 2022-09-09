@@ -1,0 +1,15 @@
+:host {
+  display: flex;
+  width: 100%;
+  .register-container {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 100px;
+  }
+
+  a {
+    text-align: center;
+  }
+}
