@@ -90,4 +90,20 @@ export class ScooterService {
             throw new InternalServerErrorException("Failed to update scooter!");
         }
     }
+
+
+    async createScooter(s: Scooter) {
+        Logger.log(JSON.stringify(s))
+        const query = `
+        INSERT INTO ${this.tableName} (uid, address, availability, model, name, price, stars)
+          VALUES ('${s.uid}', '${s.address}', ${s.availability}, '${s.model}', '${s.name}',${s.price}, ${s.stars});
+        `;      
+      try {
+        const result = await this.pg.query(query);
+        return this.getScooterByUid(s.uid);
+      } catch (error) {
+        console.log(error);
+        throw new Error("Failed to insert Rent to table!");
+      }
+    }
 }

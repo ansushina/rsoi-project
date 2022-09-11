@@ -1,3 +1,5 @@
+import { randomUUID } from "crypto";
+
 export class Rent {
 
   id?: number;
@@ -17,13 +19,16 @@ export class Rent {
   end_data: string;
 }
 
-// CREATE TABLE scooters
+// CREATE TABLE rent
 // (
 //     id                SERIAL PRIMARY KEY,
 //     uid uuid        NOT NULL,
-//     name  VARCHAR(80) NOT NULL,
-//      model TEXT,
-//      adress TEXT,
-//      stars REAL,
-//     price INT
+
+
+// user_uid uuid,
+// payment_uid uuid,
+// scooter_uid uuid,
+// status TEXT,
+// start_date timestamp, 
+// end_data timestamp
 // );

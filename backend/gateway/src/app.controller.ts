@@ -10,7 +10,8 @@ import { SessionDto } from './models/session';
 import { Roles, RolesGuard } from './utils/guards/roles.guard';
 import { RentService } from './services/rent/rent.service';
 import { PaymentService } from './services/payment/payment.service';
-import  moment  from 'moment';
+import * as moment from 'moment';
+import { Scooter } from './models/scooter';
 
 @Controller()
 export class AppController {
@@ -53,6 +54,14 @@ export class AppController {
     return this.auth.deleteSession(sessionId);
   }
 
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  @Post('/scooters')
+  async createScooter(
+    @Body() s: Scooter,
+  ) {
+    return this.scooters.createScooter(s);
+  }
 
   // а зачем мне все?
   @UseGuards(RolesGuard)
@@ -69,10 +78,11 @@ export class AppController {
   }
 
 
-
+  @UseGuards(RolesGuard)
+  @Roles('user')
   @Get('/rent')
-  async getUserRents (
-    
+  async getUserRents(
+
     @Req() request: Request,
   ) {
     const session = await this.auth.getSessionByToken(request.headers['token']?.toString())
@@ -81,7 +91,8 @@ export class AppController {
   }
 
 
-  // аренда самоката
+  @UseGuards(RolesGuard)
+  @Roles('user')
   @Post('/rent/')
   @HttpCode(200)
   async createRent(
@@ -93,7 +104,12 @@ export class AppController {
 
     const session = await this.auth.getSessionByToken(request.headers['token']?.toString())
 
+    Logger.log(JSON.stringify(session))
+
     const scooter = await this.scooters.getScooterById(scooterUid);
+
+
+    Logger.log(JSON.stringify(scooter))
 
     if (!scooter) {
       throw new Error('Самокат не найден');
@@ -103,28 +119,31 @@ export class AppController {
       throw new BadRequestException('Самокат уже используется');
     }
 
-    
+
     const userRents = await this.rent.getUserRent(session.user_uid);
-    
-    
+
+
+    Logger.log(JSON.stringify(userRents))
+
+
     // const isScooredRented = scooterRents.find(rent => new Date(rent.end_data) > new Date());
     const isUserHasRent = userRents.find(rent => new Date(rent.end_data) > new Date());
-    
+
     // if (isScooredRented) {
-      //   throw new BadRequestException('Самокат уже арендован');
-      // } 
-      
-      if (isUserHasRent) {
-        throw new BadRequestException('У пользователя уже есть арендованный самокат');
-      }
+    //   throw new BadRequestException('Самокат уже арендован');
+    // } 
+
+    if (isUserHasRent) {
+      throw new BadRequestException('У пользователя уже есть арендованный самокат');
+    }
 
 
-      
-    const resultSU =  await this.scooters.updateScooterStatus(scooterUid, false)
+
+    const resultSU = await this.scooters.updateScooterStatus(scooterUid, false)
 
     if (!resultSU) {
       throw new InternalServerErrorException('Не удалось изменить статус самоката');
-    } 
+    }
     // создать ренту
 
 
@@ -134,9 +153,9 @@ export class AppController {
 
     // создать оплату 
 
-    const paymentDto = { payment_uid: uuidv4(), status: 'PAID' , price: scooter.price } as Payment 
+    const paymentDto = { payment_uid: uuidv4(), status: 'PAID', price: scooter.price } as Payment
 
-    const payment =  await this.payment.createPayment(session.user_uid, paymentDto);
+    const payment = await this.payment.createPayment(session.user_uid, paymentDto);
 
     if (!payment) {
       await this.scooters.updateScooterStatus(scooterUid, true);
@@ -155,7 +174,7 @@ export class AppController {
       end_data: endDate,
     };
 
-    const r = await this.rent.createRent(newRent);
+    const r = await this.rent.createRent(newRent, session.user_uid);
 
     if (!r) {
       await this.payment.changePaymentState(session.user_uid, payment.payment_uid, 'CANCELED');
@@ -165,9 +184,7 @@ export class AppController {
 
     // // Logger.log(JSON.stringify(r))
     return {
-      ...r, 
-      startDate: moment(new Date(r.startDate)).format('YYYY-MM-DD'),
-      endDate: moment(new Date(r.endDate)).format('YYYY-MM-DD'),
+      ...r,
       payment: {
         status: payment.status,
         price: payment.price,
@@ -175,6 +192,8 @@ export class AppController {
     }
   }
 
+  @UseGuards(RolesGuard)
+  @Roles('user')
   @Get('/rent/:rentId')
   async getRentById(
     @Param('rentId') uid: string,
@@ -182,55 +201,68 @@ export class AppController {
   ) {
     const session = await this.auth.getSessionByToken(request.headers['token']?.toString())
 
+    
+    Logger.log(JSON.stringify(session))
+
+
     const r = await this.rent.getRentById(uid);
-    if (r.user_uid !== session.user_uid) {
+
+    
+    Logger.log(JSON.stringify(r))
+
+    if (!r || r.user_uid !== session.user_uid) {
       throw new ForbiddenException('Этот заказ не принадлежит пользователю');
     }
-    const p = await this.payment.getPayment(session.user_uid, r.payment_uid); 
+    const p = await this.payment.getPayment(session.user_uid, r.payment_uid);
 
     return {
       ...r,
-      startDate: moment(new Date(r.start_date)).format('YYYY-MM-DD'),
-      endDate: moment(new Date(r.end_data)).format('YYYY-MM-DD'),
-      paymentUid: undefined, 
+      paymentUid: undefined,
       payment: p ? {
         status: p.status,
         price: p.price,
       } : {}
     }
-   }
+  }
 
-  // Возможно стоит заменить на patch
+  @UseGuards(RolesGuard)
+  @Roles('user')
   @Delete('/rent/:rentId')
   @HttpCode(204)
   async deleteRent(
     @Param('rentId') uid: string,
     @Req() request: Request
   ) {
-    
+
     const session = await this.auth.getSessionByToken(request.headers['token']?.toString())
+    
+    
+    Logger.log(JSON.stringify(session))
 
     const r = await this.rent.getRentById(uid);
+    
+    
+    Logger.log(JSON.stringify(r))
     if (r.user_uid !== session.user_uid) {
       throw new ForbiddenException('Этот заказ не принадлежит пользователю');
     }
 
-          
-    const resultSU =  await this.scooters.updateScooterStatus(r.scooter_uid, true)
+
+    const resultSU = await this.scooters.updateScooterStatus(r.scooter_uid, true)
 
     if (!resultSU) {
       throw new InternalServerErrorException('Не удалось изменить статус самоката');
-    } 
+    }
     // создать ренту
 
     // // status rent canceled
 
     const rent = await this.rent.setRentStatus(session.user_uid, uid, 'CANCELED').toPromise();
-    
-    
-        if (!rent) {
-          throw new ServiceUnavailableException('Rent Service unavailable')
-        }
+
+
+    if (!rent) {
+      throw new ServiceUnavailableException('Rent Service unavailable')
+    }
 
 
     const p = await this.payment.changePaymentState(session.user_uid, rent.payment_uid, 'CANCELED');
@@ -240,4 +272,16 @@ export class AppController {
     }
 
   }
+
+
+
+  @Post('rent/:rentId/finish') 
+  async finishRent(
+    @Param('rentId') uid: string,
+    @Req() request: Request
+  ) {
+
+  }
+
+
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { Scooter } from 'src/models/scooter';
 import { ScooterService } from 'src/scooter/services/scooter/scooter.service';
 
@@ -38,5 +38,13 @@ export class ScooterController {
         @Body() scooter: Scooter,
     ) {
         return this.scooters.updateScooterStatus(uid, scooter.availability);
+    }
+
+
+    @Post('/')
+    async createScooter(
+        @Body() scooter: Scooter,
+    ) {
+        return this.scooters.createScooter(scooter);
     }
 }

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { catchError, lastValueFrom, map, Observable, of, tap } from 'rxjs';
 
 import { HttpService } from '@nestjs/axios';
@@ -50,4 +50,16 @@ export class ScootersService {
         ));
     }
 
+
+    public createScooter(s:Scooter) {
+        const url = this.path + '/scooters';
+
+        return lastValueFrom(this.http.post(url, s).pipe(
+            map(res => res.data),
+            // catchError(e => of(null))
+            catchError(e => {
+                throw new HttpException(e.response.data, e.response.status);
+              }),
+        ));
+    }
 }

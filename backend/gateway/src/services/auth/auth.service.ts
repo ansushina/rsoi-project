@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { HttpService } from '@nestjs/axios';
 import { catchError, lastValueFrom, map, Observable, of } from 'rxjs';
@@ -50,7 +50,9 @@ export class AuthService {
 
         return lastValueFrom(this.http.post(url, user).pipe(
             map(res => res.data),
-            catchError(e => of(null))
+            catchError(e => {
+                throw new HttpException(e.response.data, e.response.status);
+              }),
         ));
     }
 
@@ -60,7 +62,9 @@ export class AuthService {
 
         return lastValueFrom(this.http.post(url, session).pipe(
             map(res => res.data),
-            catchError(e => of(null))
+            catchError(e => {
+                throw new HttpException(e.response?.data, e.response.status);
+            }),
         ));
     }
 
@@ -69,7 +73,9 @@ export class AuthService {
 
         return lastValueFrom(this.http.delete(url).pipe(
             map(res => res.data),
-            catchError(e => of(null))
+            catchError(e => {
+                throw new HttpException(e.response.data, e.response.status);
+              }),
         ));
     }
 }

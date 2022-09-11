@@ -68,14 +68,7 @@ export class RentController {
         @Param('RentUid') uid: string,  
         @Req() request: Request
     ) {
-        const username: string = request.headers['x-user-name']?.toString();
-        if (!username) throw new  BadRequestException('username must be provided');
-        const r = await this.rents.getRentById(uid);
-        if (r.user_uid === username) {
-            return r
-        } else {
-            throw new HttpException('Username not equal', 403);
-        }
+        return await this.rents.getRentById(uid)
     }
 
     @Post('/')

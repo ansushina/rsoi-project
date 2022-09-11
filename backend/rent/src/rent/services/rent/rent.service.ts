@@ -85,7 +85,7 @@ export class RentService {
 
         const query = `
         DELETE FROM ${this.tableName} 
-        WHERE Rent_uid='${uid}';
+        WHERE uid='${uid}';
         `;      
       try {
         await this.pg.query(query);
@@ -100,7 +100,7 @@ export class RentService {
         const query = `
         UPDATE ${this.tableName} 
         SET status='${status}'
-        WHERE Rent_uid='${uid}';
+        WHERE uid='${uid}';
         `;      
       try {
         await this.pg.query(query);

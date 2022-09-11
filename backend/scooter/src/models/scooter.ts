@@ -23,8 +23,8 @@ export class Scooter {
 //     uid uuid        NOT NULL,
 //     name  VARCHAR(80) NOT NULL,
 //      model TEXT,
-//      adress TEXT,
+//      address TEXT,
 //      stars REAL,
 //     price INT,
-//    availability BOOL,
+//    availability BOOL
 // );
