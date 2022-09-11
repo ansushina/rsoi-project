@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 import { lastValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 
@@ -21,6 +22,7 @@ export class AuthPageComponent implements OnInit {
     private readonly fb: FormBuilder,
     private readonly auth: AuthService,
     private readonly snackBar: MatSnackBar,
+    private readonly router: Router,
   ) { }
 
   ngOnInit(): void {
@@ -32,7 +34,9 @@ export class AuthPageComponent implements OnInit {
     const formValue = this.authForm.value;
     console.log(this.authForm.valid, this.authForm.value);
     try {
-      await lastValueFrom(this.auth.login(formValue.login, formValue.password));
+      const session = await lastValueFrom(this.auth.login(formValue.login, formValue.password));
+      this.auth.setToken(session.jwt);
+      this.router.navigateByUrl('/');
     } catch {
       this.snackBar.open('Не удалось войти. Проверьте праивльность заполнения полей.')
     }

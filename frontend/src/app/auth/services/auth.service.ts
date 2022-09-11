@@ -10,7 +10,7 @@ import { Session, SessionDto } from 'src/app/models/session';
   providedIn: 'root'
 })
 export class AuthService {
-  private url = `${environment.baseUrl}/api/v1`;
+  private url = `${environment.baseUrl}`;
 
   constructor(private http: HttpClient) {
   }
@@ -66,5 +66,10 @@ export class AuthService {
 
   public removeToken(): void {
     (localStorage.removeItem('user-token'));
+  }
+
+
+  public setToken(token: string) {
+    localStorage.setItem('user-token', token);
   }
 }

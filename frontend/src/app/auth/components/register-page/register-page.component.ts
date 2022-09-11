@@ -3,6 +3,8 @@ import { FormBuilder } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { lastValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { v4 as uuidv4 } from 'uuid';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -22,23 +24,33 @@ export class RegisterPageComponent implements OnInit {
     private readonly fb: FormBuilder,
     private readonly auth: AuthService,
     private readonly snackBar: MatSnackBar,
+    private readonly router: Router,
   ) { }
 
   ngOnInit(): void {
   }
 
-   public register() {
+  public async register() {
     if (!this.registerForm.valid) return;
 
     const formValue = this.registerForm.value;
     try {
-      await lastValueFrom(this.auth.createUser({}))
+      const user = await lastValueFrom(this.auth.createUser({
+        uid: uuidv4(),
+        user_role: 'user',
+        login: formValue.login,
+        password: formValue.password,
+      }))
 
-    } catch (e: unknown){
+      const session = await lastValueFrom(this.auth.login(formValue.login, formValue.password))
+      this.auth.setToken(session.jwt);
+      this.router.navigateByUrl('/');
+
+    } catch (e: unknown) {
       if (e instanceof Error) {
         this.snackBar.open(e.message);
       }
     }
-   }
+  }
 
 }
