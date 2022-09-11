@@ -1,3 +1,6 @@
+import { Payment } from "./payment";
+import { Scooter } from "./scooter";
+
 export interface Rent {
 
   id?: number;
@@ -15,6 +18,10 @@ export interface Rent {
   start_date: string;
 
   end_data: string;
+
+  payment?: Payment;
+
+  scooter?: Scooter;
 }
 
 // CREATE TABLE scooters

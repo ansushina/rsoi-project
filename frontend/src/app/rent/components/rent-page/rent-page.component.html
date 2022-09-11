@@ -1,4 +1,9 @@
-<div>
-  <p> Вы в процессе поездки. </p>
-  <button mat-raised-button color="primary">Завершить поездку</button>
+<div *ngIf="rent | async as r" class="rent-container mat-elevation-z8">
+  <h1> Вы в процессе поездки. </h1>
+  <div >
+    <p>
+      Начало поездки: {{r.start_date | date: 'yyyy.MM.dd hh:mm'}}
+    </p>
+  </div>
+  <button mat-raised-button color="primary" (click)="stopRent(r.uid)">Завершить поездку</button>
 </div>

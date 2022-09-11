@@ -69,8 +69,8 @@ export class RentService {
     async createRent(r: Rent) {
         Logger.log(JSON.stringify(r))
         const query = `
-        INSERT INTO ${this.tableName} (uid, user_uid, payment_uid, scooter_uid, status, start_date, end_data)
-          VALUES ('${r.uid}', '${r.user_uid}', '${r.payment_uid}', '${r.scooter_uid}', '${r.status}',timestamp '${r.start_date}',timestamp '${r.end_data}');
+        INSERT INTO ${this.tableName} (uid, user_uid, scooter_uid, status, start_date)
+          VALUES ('${r.uid}', '${r.user_uid}', '${r.scooter_uid}', '${r.status}',timestamp '${r.start_date}');
         `;      
       try {
         const result = await this.pg.query(query);
@@ -100,7 +100,7 @@ export class RentService {
         const query = `
         UPDATE ${this.tableName} 
         SET status='${status}' ${endDate ? ",end_data= timestamp'" + endDate +"'" : ''} 
-        ${ payment ? ",end_data= timestamp'" + payment + "'" : ''} 
+        ${ payment ? ",payment_uid='" + payment + "'" : ''} 
         WHERE uid='${uid}';
         `;      
       try {

@@ -199,7 +199,6 @@ export class AppController {
       throw new InternalServerErrorException('Не удалось оплатить');
     }
 
-    // // Logger.log(JSON.stringify(r))
     return {
       ...r,
       // payment: {
@@ -230,7 +229,15 @@ export class AppController {
     if (!r || r.user_uid !== session.user_uid) {
       throw new ForbiddenException('Этот заказ не принадлежит пользователю');
     }
-    const p = await this.payment.getPayment(session.user_uid, r.payment_uid);
+    let p;
+    console.log('asdasdsa')
+    if (r.payment_uid) {
+      console.log(JSON.stringify(r))
+      p = await this.payment.getPayment(session.user_uid, r.payment_uid);
+    }
+
+    
+    const scooter = await this.scooters.getScooterById(r.scooter_uid);
 
     return {
       ...r,
@@ -238,7 +245,8 @@ export class AppController {
       payment: p ? {
         status: p.status,
         price: p.price,
-      } : {}
+      } : {},
+      scooter
     }
   }
 
@@ -320,8 +328,8 @@ export class AppController {
       throw new Error('Самокат не найден');
     }
 
-    if (scooter.availability != true) {
-      throw new BadRequestException('Самокат уже используется');
+    if (scooter.availability == true) {
+      throw new BadRequestException('Самокат уже не используется');
     }
 
     //  создать оплату
@@ -338,13 +346,12 @@ export class AppController {
 
     const rent = await this.rent.setRentStatus(session.user_uid, uid, 'ended', (new Date()).toISOString(), payment.payment_uid).toPromise();
 
+    
+    const resultSU = await this.scooters.updateScooterStatus(r.scooter_uid, true)
 
-    const p = await this.payment.changePaymentState(session.user_uid, rent.payment_uid, 'CANCELED');
-
-    if (!p) {
-      throw new ServiceUnavailableException('Payment Service unavailable')
+    if (!resultSU) {
+      throw new InternalServerErrorException('Не удалось изменить статус самоката');
     }
-
 
   }
 

@@ -12,6 +12,10 @@ const routes: Routes = [
     path: ``,
     component: RentPageComponent,
   },
+  {
+    path: `:rentId`,
+    component: RentPageComponent,
+  },
 
 ];
 
