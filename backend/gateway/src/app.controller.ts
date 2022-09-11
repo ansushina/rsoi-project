@@ -87,7 +87,24 @@ export class AppController {
   ) {
     const session = await this.auth.getSessionByToken(request.headers['token']?.toString())
 
-    return await this.rent.getUserRent(session.user_uid);
+    const userRents = await this.rent.getUserRent(session.user_uid); 
+
+    const result = [];
+
+    for (const rent of userRents) {
+      let payment;
+      if (rent.payment_uid) {
+      payment = await this.payment.getPayment(session.user_uid, rent.payment_uid);
+      }
+      const scooter = await this.scooters.getScooterById(rent.scooter_uid);
+      result.push({
+        ...rent,
+        payment,
+        scooter,
+      })
+    }
+
+    return result;
   }
 
 
@@ -98,7 +115,7 @@ export class AppController {
   async createRent(
     @Req() request: Request,
     @Body('startDate') startDate: string,
-    @Body('endDate') endDate: string,
+    // @Body('endDate') endDate: string,
     @Body('scooterUid') scooterUid: string,
   ) {
 
@@ -153,31 +170,31 @@ export class AppController {
 
     // создать оплату 
 
-    const paymentDto = { payment_uid: uuidv4(), status: 'PAID', price: scooter.price } as Payment
+    // const paymentDto = { payment_uid: uuidv4(), status: 'PAID', price: scooter.price } as Payment
 
-    const payment = await this.payment.createPayment(session.user_uid, paymentDto);
+    // const payment = await this.payment.createPayment(session.user_uid, paymentDto);
 
-    if (!payment) {
-      await this.scooters.updateScooterStatus(scooterUid, true);
-      throw new InternalServerErrorException('Не удалось оплатить');
-    }
+    // if (!payment) {
+    //   await this.scooters.updateScooterStatus(scooterUid, true);
+    //   throw new InternalServerErrorException('Не удалось оплатить');
+    // }
 
 
 
     const newRent = {
       user_uid: session.user_uid,
       scooter_uid: scooter.uid,
-      payment_uid: payment.payment_uid,
+      // payment_uid: payment.payment_uid,
       uid: uuidv4(),
       status: 'started',
       start_date: startDate,
-      end_data: endDate,
+      // end_data: endDate,
     };
 
     const r = await this.rent.createRent(newRent, session.user_uid);
 
     if (!r) {
-      await this.payment.changePaymentState(session.user_uid, payment.payment_uid, 'CANCELED');
+      // await this.payment.changePaymentState(session.user_uid, payment.payment_uid, 'CANCELED');
       await this.scooters.updateScooterStatus(scooterUid, true);
       throw new InternalServerErrorException('Не удалось оплатить');
     }
@@ -185,10 +202,10 @@ export class AppController {
     // // Logger.log(JSON.stringify(r))
     return {
       ...r,
-      payment: {
-        status: payment.status,
-        price: payment.price,
-      }
+      // payment: {
+      //   status: payment.status,
+      //   price: payment.price,
+      // }
     }
   }
 
@@ -201,13 +218,13 @@ export class AppController {
   ) {
     const session = await this.auth.getSessionByToken(request.headers['token']?.toString())
 
-    
+
     Logger.log(JSON.stringify(session))
 
 
     const r = await this.rent.getRentById(uid);
 
-    
+
     Logger.log(JSON.stringify(r))
 
     if (!r || r.user_uid !== session.user_uid) {
@@ -235,13 +252,13 @@ export class AppController {
   ) {
 
     const session = await this.auth.getSessionByToken(request.headers['token']?.toString())
-    
-    
+
+
     Logger.log(JSON.stringify(session))
 
     const r = await this.rent.getRentById(uid);
-    
-    
+
+
     Logger.log(JSON.stringify(r))
     if (r.user_uid !== session.user_uid) {
       throw new ForbiddenException('Этот заказ не принадлежит пользователю');
@@ -275,11 +292,59 @@ export class AppController {
 
 
 
-  @Post('rent/:rentId/finish') 
+  @Post('rent/:rentId/finish')
   async finishRent(
     @Param('rentId') uid: string,
     @Req() request: Request
   ) {
+
+    const session = await this.auth.getSessionByToken(request.headers['token']?.toString())
+
+
+    Logger.log(JSON.stringify(session))
+
+    const r = await this.rent.getRentById(uid);
+
+
+    Logger.log(JSON.stringify(r))
+    if (r.user_uid !== session.user_uid) {
+      throw new ForbiddenException('Этот заказ не принадлежит пользователю');
+    }
+
+    const scooter = await this.scooters.getScooterById(r.scooter_uid);
+
+
+    Logger.log(JSON.stringify(scooter))
+
+    if (!scooter) {
+      throw new Error('Самокат не найден');
+    }
+
+    if (scooter.availability != true) {
+      throw new BadRequestException('Самокат уже используется');
+    }
+
+    //  создать оплату
+
+    const paymentDto = { payment_uid: uuidv4(), status: 'PAID', price: scooter.price } as Payment
+
+    const payment = await this.payment.createPayment(session.user_uid, paymentDto);
+
+    if (!payment) {
+      // await this.scooters.updateScooterStatus(r.scooter_uid, true);
+      throw new InternalServerErrorException('Не удалось оплатить');
+    }
+
+
+    const rent = await this.rent.setRentStatus(session.user_uid, uid, 'ended', (new Date()).toISOString(), payment.payment_uid).toPromise();
+
+
+    const p = await this.payment.changePaymentState(session.user_uid, rent.payment_uid, 'CANCELED');
+
+    if (!p) {
+      throw new ServiceUnavailableException('Payment Service unavailable')
+    }
+
 
   }
 

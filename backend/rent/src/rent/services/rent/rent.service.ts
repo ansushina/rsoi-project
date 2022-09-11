@@ -95,11 +95,12 @@ export class RentService {
       }
     }
 
-    async updateRentStatus(uid: string, status: string) {
+    async updateRentStatus(uid: string, status: string, endDate?: string, payment?: string) {
         
         const query = `
         UPDATE ${this.tableName} 
-        SET status='${status}'
+        SET status='${status}' ${endDate ? ",end_data= timestamp'" + endDate +"'" : ''} 
+        ${ payment ? ",end_data= timestamp'" + payment + "'" : ''} 
         WHERE uid='${uid}';
         `;      
       try {

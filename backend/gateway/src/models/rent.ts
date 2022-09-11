@@ -6,7 +6,7 @@ export class Rent {
 
   user_uid: string;
 
-  payment_uid: string;
+  payment_uid?: string;
 
   scooter_uid: string;
 
@@ -14,7 +14,7 @@ export class Rent {
 
   start_date: string;
   
-  end_data: string;
+  end_data?: string;
 }
 
 // CREATE TABLE scooters

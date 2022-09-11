@@ -65,10 +65,10 @@ export class RentService {
         ));
     }
 
-    public setRentStatus(username, uid,  status) {
+    public setRentStatus(username, uid,  status, end_data?: string, payment_uid?: string) {
         const url = this.path + `/rent/${uid}`;
 
-        return this.http.patch<Rent>(url, {status} ,  {headers: {
+        return this.http.patch<Rent>(url, {status, end_data, payment_uid} ,  {headers: {
             'X-User-Name': username,
         }}).pipe(
             map(res => res.data),

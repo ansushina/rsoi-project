@@ -96,12 +96,14 @@ export class RentController {
         @Param('RentUid') uid: string,  
         @Req() request: Request,
         @Body('status') status: string, 
+        @Body('end_date') endDate: string, 
+        @Body('payment_uid') payment: string, 
     ) {
         const username: string = request.headers['x-user-name']?.toString();
         if (!username) throw new  BadRequestException('username must be provided');
         const r = await this.rents.getRentById(uid);
         if (r.user_uid === username) {
-            const result = await this.rents.updateRentStatus(uid, status);
+            const result = await this.rents.updateRentStatus(uid, status, endDate, payment);
             // const h = await this.Scooter.getScooterById(r.Scooter_id);
             return result;
         } else {
