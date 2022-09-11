@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 import { NonAuthGuard } from './core/guards/non-auth.guard';
+import { NonRentedGuard } from './core/guards/non-rented.guard';
+import { RentedGuard } from './core/guards/rented.guard';
 // import { AuthGuard } from './auth/guards/auth.guard';
 // import { NonAuthGuard } from './auth/guards/non-auth.quard';
 
@@ -14,12 +16,12 @@ const routes: Routes = [
     {
         path: ``,
         loadChildren: () => import(`./scooters/scooters.module`).then((module) => module.ScootersModule),
-        canActivate: [AuthGuard],
+        canActivate: [AuthGuard, NonRentedGuard],
     },
     {
         path: `rent`,
         loadChildren: () => import(`./rent/rent.module`).then((module) => module.RentModule),
-        canActivate: [AuthGuard],
+        canActivate: [AuthGuard, RentedGuard],
     },
     {
       path: `user`,

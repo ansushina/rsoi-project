@@ -1,15 +1,35 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, CanActivate, RouterStateSnapshot, UrlTree } from '@angular/router';
-import { Observable } from 'rxjs';
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { lastValueFrom, Observable } from 'rxjs';
+import { RentService } from 'src/app/rent/services/rent.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RentedGuard implements CanActivate {
-  canActivate(
+  public constructor(
+    private readonly rent: RentService,
+    private readonly router: Router,
+  ) { }
+
+
+  async canActivate(
     route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    return true;
+    state: RouterStateSnapshot) {
+      try {
+        const rents = await lastValueFrom(this.rent.getUserRent());
+
+
+        const result = rents.find(rent => rent.status === 'started')
+
+        if (!result) {
+          return this.router.parseUrl(`/`);
+        } else {
+          return true;
+        }
+      } catch {
+        return this.router.parseUrl('/')
+      }
   }
-  
+
 }
