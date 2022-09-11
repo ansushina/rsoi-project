@@ -1,58 +1,33 @@
-<p>scooters-page works!</p>
+<ng-container *ngIf="scooters | async as s">
+  <div class="scooters-list">
 
-<div class="scooters-list">
-  <mat-card>
-    <mat-card-title>Scooter 1</mat-card-title>
-    <mat-card-content>
-      <p>This card has divider and indeterminate progress as footer</p>
-    </mat-card-content>
-    <mat-card-actions>
-      <button mat-button>LIKE</button>
-      <button mat-button>SHARE</button>
-    </mat-card-actions>
-  </mat-card>
+    <mat-card *ngFor="let scooter of s.items" class="scooter-card mat-elevation-z8">
+      <mat-card-title>{{scooter.name}}</mat-card-title>
+      <mat-card-content>
+        <table cellSpacing="8">
 
-  <mat-card>
-    <mat-card-title>Scooter 1</mat-card-title>
-    <mat-card-content>
-      <p>This card has divider and indeterminate progress as footer</p>
-    </mat-card-content>
-    <mat-card-actions>
-      <button mat-button>LIKE</button>
-      <button mat-button>SHARE</button>
-    </mat-card-actions>
-  </mat-card>
+          <tr class="scooter-property-row">
+            <td class="scooter-property-name"> Модель </td>
+            <td class="scooter-property-value"> {{scooter.model}} </td>
+          </tr>
+          <tr class="scooter-property-row">
+            <td class="scooter-property-name"> Адрес </td>
+            <td class="scooter-property-value"> {{scooter.address}} </td>
+          </tr>
 
-  <mat-card>
-    <mat-card-title>Scooter 1</mat-card-title>
-    <mat-card-content>
-      <p>This card has divider and indeterminate progress as footer</p>
-    </mat-card-content>
-    <mat-card-actions>
-      <button mat-button>LIKE</button>
-      <button mat-button>SHARE</button>
-    </mat-card-actions>
-  </mat-card>
+          <tr class="scooter-property-row">
+            <td class="scooter-property-name"> Цена </td>
+            <td class="scooter-property-value"> {{scooter.price}} </td>
+          </tr>
+        </table>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button [routerLink]="['/rent',scooter.id,'create']">Арендовать</button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
 
-  <mat-card>
-    <mat-card-title>Scooter 1</mat-card-title>
-    <mat-card-content>
-      <p>This card has divider and indeterminate progress as footer</p>
-    </mat-card-content>
-    <mat-card-actions>
-      <button mat-button>LIKE</button>
-      <button mat-button>SHARE</button>
-    </mat-card-actions>
-  </mat-card>
-
-  <mat-card>
-    <mat-card-title>Scooter 1</mat-card-title>
-    <mat-card-content>
-      <p>This card has divider and indeterminate progress as footer</p>
-    </mat-card-content>
-    <mat-card-actions>
-      <button mat-button>LIKE</button>
-      <button mat-button>SHARE</button>
-    </mat-card-actions>
-  </mat-card>
-</div>
+  <mat-paginator [length]="s.totalElements" [pageSize]="this.page.value" [pageSizeOptions]="[5, 10, 25, 100]"
+    (page)="changePage($event)" aria-label="Выбрете страницу">
+  </mat-paginator>
+</ng-container>

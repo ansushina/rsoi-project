@@ -21,6 +21,11 @@ const routes: Routes = [
         loadChildren: () => import(`./rent/rent.module`).then((module) => module.RentModule),
         canActivate: [AuthGuard],
     },
+    {
+      path: `user`,
+      loadChildren: () => import(`./user/user.module`).then((module) => module.UserModule),
+      canActivate: [AuthGuard],
+  },
 ];
 
 @NgModule({

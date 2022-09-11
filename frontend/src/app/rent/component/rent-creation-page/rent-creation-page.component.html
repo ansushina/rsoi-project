@@ -1,0 +1,28 @@
+pent create
+<div class="auth-container mat-elevation-z8">
+
+  <mat-form-field class="maria-small-form-field">
+    <mat-label>Дата начала</mat-label>
+    <input matInput [matDatepicker]="picker" [formControl]="dateFromControl" [max]="maxDate">
+    <mat-datepicker-toggle matSuffix [for]="picker">
+      <mat-icon matDatepickerToggleIcon>event</mat-icon>
+    </mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
+
+
+  <mat-form-field class="maria-small-form-field">
+    <mat-label>Дата конца</mat-label>
+    <input matInput [matDatepicker]="picker2" [formControl]="dateToControl" [min]="minDate">
+    <mat-datepicker-toggle matSuffix [for]="picker2">
+      <mat-icon matDatepickerToggleIcon>event</mat-icon>
+    </mat-datepicker-toggle>
+    <mat-datepicker type="datetime" #picker2></mat-datepicker>
+  </mat-form-field>
+
+  <button mat-raised-button color="primary">
+    Забронировать
+  </button>
+
+  <a [routerLink]="'/'">Назад</a>
+</div>

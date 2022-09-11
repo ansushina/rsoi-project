@@ -4,6 +4,8 @@ import { ScootersPageComponent } from './components/scooters-page/scooters-page.
 import { ScootersRoutingModule } from './scooters-routing.module';
 import {MatCardModule} from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import {MatPaginatorModule} from '@angular/material/paginator';
+
 
 
 
@@ -16,6 +18,7 @@ import { MatButtonModule } from '@angular/material/button';
     ScootersRoutingModule,
     MatCardModule,
     MatButtonModule,
+    MatPaginatorModule,
   ]
 })
 export class ScootersModule { }

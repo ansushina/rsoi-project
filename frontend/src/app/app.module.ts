@@ -5,8 +5,11 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { CoreModule } from './core/core.module';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { TokenInterceptor } from './core/interceptors/token.interceptor';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import { CommonModule } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -14,14 +17,22 @@ import {MatSnackBarModule} from '@angular/material/snack-bar';
   ],
   imports: [
     BrowserModule,
+    CommonModule,
     AppRoutingModule,
     NoopAnimationsModule,
     CoreModule,
     BrowserModule,
     HttpClientModule,
     MatSnackBarModule,
+    MatPaginatorModule,
   ],
-  providers: [],
+  providers: [
+      {
+          provide: HTTP_INTERCEPTORS,
+          useClass: TokenInterceptor,
+          multi: true,
+      },
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

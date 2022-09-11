@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 
-import {HttpClient, HttpHeaders} from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { User } from 'src/app/models/user';
 import { Session, SessionDto } from 'src/app/models/session';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,12 @@ import { Session, SessionDto } from 'src/app/models/session';
 export class AuthService {
   private url = `${environment.baseUrl}`;
 
-  constructor(private http: HttpClient) {
+
+  private _isAuth = new BehaviorSubject(Boolean(localStorage.getItem('user-token')));
+
+  public isAuth$ = this._isAuth.asObservable();
+
+  constructor(private http: HttpClient, private readonly router: Router) {
   }
 
   public createUser(source: User): Observable<User> {
@@ -26,7 +32,7 @@ export class AuthService {
         Authorization: 'Bearer ' + localStorage.getItem('user-token'),
       });
     }
-    return this.http.get<User>(`${this.url}/users/${username}/`, {headers: myHeaders});
+    return this.http.get<User>(`${this.url}/users/${username}/`, { headers: myHeaders });
   }
 
   public updateUser(username: string, source: User): Observable<User> {
@@ -36,7 +42,7 @@ export class AuthService {
         Authorization: 'Bearer ' + localStorage.getItem('user-token'),
       });
     }
-    return this.http.patch<User>(`${this.url}/users/${username}/`, source, {headers: myHeaders});
+    return this.http.patch<User>(`${this.url}/users/${username}/`, source, { headers: myHeaders });
   }
 
   public login(login: string, password: string): Observable<Session> {
@@ -47,13 +53,24 @@ export class AuthService {
     } as SessionDto;
     console.log(source)
     console.log(this.url)
-    return this.http.post<Session>(`${this.url}/sessions/`, source);
+    return this.http.post<Session>(`${this.url}/sessions/`, source).pipe(
+      tap(session => {
+        localStorage.setItem('user-token', session.jwt);
+        localStorage.setItem('username', session.user_uid);
+        localStorage.setItem('login', login);
+        localStorage.setItem('id', session.uid);
+        this._isAuth.next(true);
+      })
+    );
   }
 
   public logout(): void {
     localStorage.removeItem('user-token');
     localStorage.removeItem('username');
+    localStorage.removeItem('login');
     localStorage.removeItem('id');
+    this._isAuth.next(false);
+    this.router.navigateByUrl('/auth')
   }
 
   public get logIn(): boolean {

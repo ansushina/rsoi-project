@@ -1,0 +1,30 @@
+<div>
+  <h1 class="mat-h1">Пользователь: {{login}}</h1>
+</div>
+<div *ngIf="rents | async as dataSource">
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+    <ng-container matColumnDef="scooterName">
+      <th mat-header-cell *matHeaderCellDef> Самокат </th>
+      <td mat-cell *matCellDef="let element"> {{ element.scooter.name }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="startDate">
+      <th mat-header-cell *matHeaderCellDef> Дата начала </th>
+      <td mat-cell *matCellDef="let element"> {{ element.start_date | date: 'yyyy.MM.dd hh:mm' }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="endDate">
+      <th mat-header-cell *matHeaderCellDef> Дата конца</th>
+      <td mat-cell *matCellDef="let element"> {{ element.end_data | date: 'yyyy.MM.dd hh:mm' }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="price">
+      <th mat-header-cell *matHeaderCellDef> Стоимость </th>
+      <td mat-cell *matCellDef="let element"> {{ element?.payment?.price }} </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+</div>

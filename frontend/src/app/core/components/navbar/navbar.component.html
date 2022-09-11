@@ -1,5 +1,12 @@
 
   <mat-toolbar class="mat-elevation-z1">
-    <span>My Course work</span>
+    <span [routerLink]="'/'">My Course work</span>
+
+    <div *ngIf="auth.isAuth$ | async">
+
+      <button mat-icon-button [routerLink]="'/user'"><mat-icon>person</mat-icon></button>
+
+      <button mat-icon-button (click)="auth.logout()"><mat-icon>logout</mat-icon></button>
+    </div>
   </mat-toolbar>
 
