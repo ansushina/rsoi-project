@@ -1,0 +1,140 @@
+name: GitHub Classroom Workflow
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+jobs:
+  build:
+    name: Autograding
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        node-version: [12.x]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      # TODO build, test and deploy project
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      
+      - name: build rent
+        run: |
+          cd v2/reservation
+          npm ci
+          npm run build
+
+      - name: deploy RENT
+        uses: akhileshns/heroku-deploy@v3.4.6
+        with:
+          heroku_api_key: d4b7dd87-55ec-44e7-8174-4bd38d1bd31a
+          heroku_app_name: rsoi-reservation
+          heroku_email: nastya.sushina@yandex.ru
+          usedocker: true
+          appdir: v2/reservation
+        
+
+      - name: build payment
+        run: |
+          cd v2/payment
+          npm ci
+          npm run build
+
+      - name: deploy PAYMENT
+        uses: akhileshns/heroku-deploy@v3.4.6
+        with:
+          heroku_api_key: d4b7dd87-55ec-44e7-8174-4bd38d1bd31a
+          heroku_app_name: rsoi-payment
+          heroku_email: nastya.sushina@yandex.ru
+          usedocker: true
+          appdir: v2/payment
+
+
+      - name: build gateway
+        run: |
+          cd v2/gateway
+          npm ci
+          npm run build
+
+      - name: deploy GATEWAY
+        uses: akhileshns/heroku-deploy@v3.4.6
+        with:
+          heroku_api_key: d4b7dd87-55ec-44e7-8174-4bd38d1bd31a
+          heroku_app_name: rsoi-ansushina
+          heroku_email: nastya.sushina@yandex.ru
+          usedocker: true
+          appdir: backend/gateway
+
+
+      - name: build scooter
+        run: |
+          cd backend/scooter
+          npm ci
+          npm run build
+
+      - name: deploy scooter
+        uses: akhileshns/heroku-deploy@v3.4.6
+        with:
+          heroku_api_key: d4b7dd87-55ec-44e7-8174-4bd38d1bd31a
+          heroku_app_name: rsoi-ansushina
+          heroku_email: nastya.sushina@yandex.ru
+          usedocker: true
+          appdir: backend/scooter
+
+      
+      - name: build sessions
+        run: |
+          cd backend/sessions
+          npm ci
+          npm run build
+
+      - name: deploy sessions
+        uses: akhileshns/heroku-deploy@v3.4.6
+        with:
+          heroku_api_key: d4b7dd87-55ec-44e7-8174-4bd38d1bd31a
+          heroku_app_name: rsoi-ansushina
+          heroku_email: nastya.sushina@yandex.ru
+          usedocker: true
+          appdir: backend/sessions
+
+      - name: build statistic
+        run: |
+          cd backend/statistic
+          npm ci
+          npm run build
+
+      - name: deploy statistic
+        uses: akhileshns/heroku-deploy@v3.4.6
+        with:
+          heroku_api_key: d4b7dd87-55ec-44e7-8174-4bd38d1bd31a
+          heroku_app_name: rsoi-ansushina
+          heroku_email: nastya.sushina@yandex.ru
+          usedocker: true
+          appdir: backend/statistic
+
+      # - name: Sleep for 5 seconds
+      #   uses: jakejarvis/wait-action@master
+      #   with:
+      #     time: '5s'
+
+      # - name: Run API Tests
+      #   uses: matt-ball/newman-action@master
+      #   with:
+      #     # TODO insert your <Variant> and <ServiceName>
+      #     collection: v2/postman/[rsoi] postman_collection.json
+      #     environment: v2/postman/[rsoi][heroku] postman_environment.json
+      #     delayRequest: 100
+      #     reporters: '[ "cli" ]'
+      #     envVar: '[{ "key":"serviceName", "value":"rsoi-loyalty" }, { "key":"herokuApiToken", "value":"d4b7dd87-55ec-44e7-8174-4bd38d1bd31a" }]'
+
+      # - uses: education/autograding@v1
+      #   id: autograder
+      #   continue-on-error: true
