@@ -12,6 +12,8 @@ import { RentService } from './services/rent/rent.service';
 import { PaymentService } from './services/payment/payment.service';
 import * as moment from 'moment';
 import { Scooter } from './models/scooter';
+import { StatisticService } from './services/statistic/statistic.service';
+import { DateTime } from 'luxon';
 
 @Controller()
 export class AppController {
@@ -21,6 +23,7 @@ export class AppController {
     private readonly auth: AuthService,
     private readonly rent: RentService,
     private readonly payment: PaymentService,
+    private readonly stats: StatisticService,
     // @InjectQueue('queue1') private queue: Queue
   ) { }
 
@@ -35,7 +38,11 @@ export class AppController {
   async registerUser(
     @Body() user: User,
   ) {
-    return this.auth.createUser(user);
+    const result = this.auth.createUser(user);
+
+    await this.stats.sendUserStatistic(user.uid, (new Date()).toISOString());
+
+    return result;
   }
 
   // вход
@@ -87,14 +94,14 @@ export class AppController {
   ) {
     const session = await this.auth.getSessionByToken(request.headers['token']?.toString())
 
-    const userRents = await this.rent.getUserRent(session.user_uid); 
+    const userRents = await this.rent.getUserRent(session.user_uid);
 
     const result = [];
 
     for (const rent of userRents) {
       let payment;
       if (rent.payment_uid) {
-      payment = await this.payment.getPayment(session.user_uid, rent.payment_uid);
+        payment = await this.payment.getPayment(session.user_uid, rent.payment_uid);
       }
       const scooter = await this.scooters.getScooterById(rent.scooter_uid);
       result.push({
@@ -236,7 +243,7 @@ export class AppController {
       p = await this.payment.getPayment(session.user_uid, r.payment_uid);
     }
 
-    
+
     const scooter = await this.scooters.getScooterById(r.scooter_uid);
 
     return {
@@ -346,14 +353,24 @@ export class AppController {
 
     const rent = await this.rent.setRentStatus(session.user_uid, uid, 'ended', (new Date()).toISOString(), payment.payment_uid).toPromise();
 
-    
+
     const resultSU = await this.scooters.updateScooterStatus(r.scooter_uid, true)
 
     if (!resultSU) {
       throw new InternalServerErrorException('Не удалось изменить статус самоката');
     }
+    const from = DateTime.fromISO(rent.start_date);
+    const to = DateTime.fromISO(rent.end_data);
+    const duration = from.diff(to, 'minutes').minutes;
+    await this.stats.sendRetnStats(rent.uid, duration.toString());
 
   }
 
 
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  @Get('stats') 
+  async getStats() {
+    return this.stats.getStats();
+  }
 }
