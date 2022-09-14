@@ -17,5 +17,5 @@ export interface Stats {
 // (
 //     id                SERIAL PRIMARY KEY,
 //     rent_uid uuid,
-//     duration real
+//     duration int
 // );

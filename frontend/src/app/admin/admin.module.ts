@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StatisticComponent } from './components/statistic/statistic.component';
+import { AdminRoutingModule } from './admin-routing.module';
 
 
 
@@ -9,7 +10,8 @@ import { StatisticComponent } from './components/statistic/statistic.component';
     StatisticComponent
   ],
   imports: [
-    CommonModule
+    CommonModule,
+    AdminRoutingModule,
   ]
 })
 export class AdminModule { }

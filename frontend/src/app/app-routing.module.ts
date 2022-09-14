@@ -4,34 +4,45 @@ import { AuthGuard } from './core/guards/auth.guard';
 import { NonAuthGuard } from './core/guards/non-auth.guard';
 import { NonRentedGuard } from './core/guards/non-rented.guard';
 import { RentedGuard } from './core/guards/rented.guard';
+import { StatsResolverResolver } from './core/resolvers/stats-resolver.resolver';
 // import { AuthGuard } from './auth/guards/auth.guard';
 // import { NonAuthGuard } from './auth/guards/non-auth.quard';
 
 const routes: Routes = [
-    {
-        path: `auth`,
-        loadChildren: () => import(`./auth/auth.module`).then((module) => module.AuthModule),
-        canActivate: [NonAuthGuard],
-    },
-    {
-        path: ``,
-        loadChildren: () => import(`./scooters/scooters.module`).then((module) => module.ScootersModule),
-        canActivate: [AuthGuard, NonRentedGuard],
-    },
-    {
-        path: `rent`,
-        loadChildren: () => import(`./rent/rent.module`).then((module) => module.RentModule),
-        canActivate: [AuthGuard, RentedGuard],
-    },
-    {
-      path: `user`,
-      loadChildren: () => import(`./user/user.module`).then((module) => module.UserModule),
-      canActivate: [AuthGuard],
+  {
+    path: `auth`,
+    loadChildren: () => import(`./auth/auth.module`).then((module) => module.AuthModule),
+    canActivate: [NonAuthGuard],
+  },
+  {
+    path: ``,
+    loadChildren: () => import(`./scooters/scooters.module`).then((module) => module.ScootersModule),
+    canActivate: [AuthGuard, NonRentedGuard],
+  },
+  {
+    path: `rent`,
+    loadChildren: () => import(`./rent/rent.module`).then((module) => module.RentModule),
+    canActivate: [AuthGuard, RentedGuard],
+  },
+  {
+    path: `user`,
+    loadChildren: () => import(`./user/user.module`).then((module) => module.UserModule),
+    canActivate: [AuthGuard],
+
+  },
+
+  {
+    path: `admin`,
+    loadChildren: () => import(`./admin/admin.module`).then((module) => module.AdminModule),
+    canActivate: [AuthGuard],
+    resolve: {
+      stats: StatsResolverResolver
+    }
   },
 ];
 
 @NgModule({
-    imports: [RouterModule.forRoot(routes)],
-    exports: [RouterModule],
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule],
 })
-export class AppRoutingModule {}
+export class AppRoutingModule { }

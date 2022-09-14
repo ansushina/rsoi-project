@@ -4,8 +4,6 @@ import { UserRole } from "./user";
 
 export interface SessionDto {
 
-    user_role: UserRole; 
-
     password: string;
 
     login: string;

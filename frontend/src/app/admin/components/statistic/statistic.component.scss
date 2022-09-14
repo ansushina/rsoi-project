@@ -1,0 +1,11 @@
+:host {
+
+  width: 100%;
+  .statistic-div {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 100px;
+  }
+}

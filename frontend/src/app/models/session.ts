@@ -2,8 +2,6 @@ import { UserRole } from "./user";
 
 export interface SessionDto {
 
-    user_role: UserRole; 
-
     password: string;
 
     login: string;
@@ -12,12 +10,12 @@ export interface SessionDto {
 
 export interface Session {
     id?: string;
-    
+
     uid: string;
 
     user_uid: string;
 
-    user_role: UserRole; 
+    user_role: UserRole;
 
     jwt: string;
 }

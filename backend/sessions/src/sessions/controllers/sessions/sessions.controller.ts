@@ -28,16 +28,12 @@ export class SessionsController {
             throw new BadRequestException('user with this uid does not exist');
         }
 
-        if (user.user_role !== session.user_role) {
-            throw new BadRequestException('cant create session for this role for this user');
-        }
-
         if (user.password !== session.password) {
             throw new BadRequestException('Wrong password');
         }
 
         return await this.sessions.createSession({
-            user_role: session.user_role, 
+            user_role: user.user_role, 
             user_uid: user.uid,
             jwt: this.generateUserToken(user.uid, user.user_role),
             uid: uuidv4(),

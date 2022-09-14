@@ -72,7 +72,7 @@ export class AppController {
 
   // а зачем мне все?
   @UseGuards(RolesGuard)
-  @Roles('user')
+  @Roles('user', 'admin')
   @Get('/scooters')
   async getScooters(
     @Query('page') page: number,
@@ -86,7 +86,7 @@ export class AppController {
 
 
   @UseGuards(RolesGuard)
-  @Roles('user')
+  @Roles('user', 'admin')
   @Get('/rent')
   async getUserRents(
 
@@ -116,7 +116,7 @@ export class AppController {
 
 
   @UseGuards(RolesGuard)
-  @Roles('user')
+  @Roles('user', 'admin')
   @Post('/rent/')
   @HttpCode(200)
   async createRent(
@@ -216,7 +216,7 @@ export class AppController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles('user')
+  @Roles('user', 'admin')
   @Get('/rent/:rentId')
   async getRentById(
     @Param('rentId') uid: string,
@@ -258,7 +258,7 @@ export class AppController {
   }
 
   @UseGuards(RolesGuard)
-  @Roles('user')
+  @Roles('user', 'admin')
   @Delete('/rent/:rentId')
   @HttpCode(204)
   async deleteRent(
@@ -307,6 +307,8 @@ export class AppController {
 
 
 
+  @UseGuards(RolesGuard)
+  @Roles('user', 'admin')
   @Post('rent/:rentId/finish')
   async finishRent(
     @Param('rentId') uid: string,
@@ -335,9 +337,9 @@ export class AppController {
       throw new Error('Самокат не найден');
     }
 
-    if (scooter.availability == true) {
-      throw new BadRequestException('Самокат уже не используется');
-    }
+    // if (scooter.availability == true) {
+    //   throw new BadRequestException('Самокат уже не используется');
+    // }
 
     //  создать оплату
 
@@ -359,9 +361,13 @@ export class AppController {
     if (!resultSU) {
       throw new InternalServerErrorException('Не удалось изменить статус самоката');
     }
+    Logger.log(rent.end_data);
+    Logger.log(rent.start_date);
     const from = DateTime.fromISO(rent.start_date);
     const to = DateTime.fromISO(rent.end_data);
-    const duration = from.diff(to, 'minutes').minutes;
+    const duration = to.diff(from, 'minutes').minutes;
+
+    Logger.log(`${rent.uid} ${duration.toString()}`)
     await this.stats.sendRetnStats(rent.uid, duration.toString());
 
   }

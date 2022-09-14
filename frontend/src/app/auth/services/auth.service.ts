@@ -18,6 +18,8 @@ export class AuthService {
 
   public isAuth$ = this._isAuth.asObservable();
 
+  public isAdmin$ =  new BehaviorSubject(localStorage.getItem('role') === 'admin');
+
   constructor(private http: HttpClient, private readonly router: Router) {
   }
 
@@ -49,7 +51,6 @@ export class AuthService {
     const source = {
       login,
       password,
-      user_role: 'user',
     } as SessionDto;
     console.log(source)
     console.log(this.url)
@@ -59,7 +60,9 @@ export class AuthService {
         localStorage.setItem('username', session.user_uid);
         localStorage.setItem('login', login);
         localStorage.setItem('id', session.uid);
+        localStorage.setItem('role', session.user_role);
         this._isAuth.next(true);
+        this.isAdmin$.next(session.user_role === 'admin');
       })
     );
   }
@@ -69,7 +72,9 @@ export class AuthService {
     localStorage.removeItem('username');
     localStorage.removeItem('login');
     localStorage.removeItem('id');
+    localStorage.removeItem('role');
     this._isAuth.next(false);
+    this.isAdmin$.next(false);
     this.router.navigateByUrl('/auth')
   }
 

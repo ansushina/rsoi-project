@@ -19,10 +19,14 @@ export class TokenInterceptor implements HttpInterceptor {
 
 
 private handleAuthError(err: HttpErrorResponse): Observable<any> {
-    if (err.status === 401 || err.status === 403) {
-        this.authService.removeToken();
+    if (err.status === 401) {
+        this.authService.logout();
         this.router.navigateByUrl(`/auth`);
         return of(err.message);
+    }
+    if (err.status === 403) {
+      this.router.navigateByUrl('/');
+      return of(err.message);
     }
     return throwError(err);
 }

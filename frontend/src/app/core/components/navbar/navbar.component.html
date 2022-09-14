@@ -4,6 +4,8 @@
 
     <div *ngIf="auth.isAuth$ | async">
 
+      <button mat-icon-button *ngIf="auth.isAdmin$ | async" [routerLink]="'/admin'"><mat-icon>list</mat-icon></button>
+
       <button mat-icon-button [routerLink]="'/user'"><mat-icon>person</mat-icon></button>
 
       <button mat-icon-button (click)="auth.logout()"><mat-icon>logout</mat-icon></button>

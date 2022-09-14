@@ -1,5 +1,7 @@
-import { Body, Get, HttpService, Injectable, Post } from '@nestjs/common';
-import { lastValueFrom, map } from 'rxjs';
+import { Body, Get, Injectable, Post } from '@nestjs/common';
+import { catchError, lastValueFrom, map, of } from 'rxjs';
+
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class StatisticService {
@@ -7,10 +9,10 @@ export class StatisticService {
     constructor(
         private readonly http: HttpService,
     ) {
-
+        console.log(this.path)
     }
 
-    private path = process.env.SCOOTER_URL;
+    private path = process.env.STATS_URL;
 
     async sendUserStatistic(
         user_uid: string,
@@ -20,7 +22,7 @@ export class StatisticService {
 
         return lastValueFrom(this.http.post(url, { user_uid, date }).pipe(
             map(res => res.data),
-            // catchError(e => of(null))
+            catchError(e => of(null))
         ));
     }
 
@@ -33,7 +35,7 @@ export class StatisticService {
 
         return lastValueFrom(this.http.post(url, {  rent_uid, duration }).pipe(
             map(res => res.data),
-            // catchError(e => of(null))
+            catchError(e => of(null))
         ));
     }
 
