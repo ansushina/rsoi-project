@@ -35,7 +35,7 @@ jobs:
       - name: deploy RENT
         uses: akhileshns/heroku-deploy@v3.4.6
         with:
-          heroku_api_key: d4b7dd87-55ec-44e7-8174-4bd38d1bd31a
+          heroku_api_key: 08a9a492-dac1-4dea-a375-823e6e235ee6
           heroku_app_name: rsoi-reservation
           heroku_email: nastya.sushina@yandex.ru
           usedocker: true
@@ -51,7 +51,7 @@ jobs:
       - name: deploy PAYMENT
         uses: akhileshns/heroku-deploy@v3.4.6
         with:
-          heroku_api_key: d4b7dd87-55ec-44e7-8174-4bd38d1bd31a
+          heroku_api_key: 08a9a492-dac1-4dea-a375-823e6e235ee6
           heroku_app_name: rsoi-payment
           heroku_email: nastya.sushina@yandex.ru
           usedocker: true
@@ -67,7 +67,7 @@ jobs:
       - name: deploy GATEWAY
         uses: akhileshns/heroku-deploy@v3.4.6
         with:
-          heroku_api_key: d4b7dd87-55ec-44e7-8174-4bd38d1bd31a
+          heroku_api_key: 08a9a492-dac1-4dea-a375-823e6e235ee6
           heroku_app_name: rsoi-ansushina
           heroku_email: nastya.sushina@yandex.ru
           usedocker: true
@@ -83,7 +83,7 @@ jobs:
       - name: deploy scooter
         uses: akhileshns/heroku-deploy@v3.4.6
         with:
-          heroku_api_key: d4b7dd87-55ec-44e7-8174-4bd38d1bd31a
+          heroku_api_key: 08a9a492-dac1-4dea-a375-823e6e235ee6
           heroku_app_name: rsoi-scooter
           heroku_email: nastya.sushina@yandex.ru
           usedocker: true
@@ -99,7 +99,7 @@ jobs:
       - name: deploy sessions
         uses: akhileshns/heroku-deploy@v3.4.6
         with:
-          heroku_api_key: d4b7dd87-55ec-44e7-8174-4bd38d1bd31a
+          heroku_api_key: 08a9a492-dac1-4dea-a375-823e6e235ee6
           heroku_app_name: rsoi-sessions
           heroku_email: nastya.sushina@yandex.ru
           usedocker: true
@@ -114,7 +114,7 @@ jobs:
       - name: deploy statistic
         uses: akhileshns/heroku-deploy@v3.4.6
         with:
-          heroku_api_key: d4b7dd87-55ec-44e7-8174-4bd38d1bd31a
+          heroku_api_key: 08a9a492-dac1-4dea-a375-823e6e235ee6
           heroku_app_name: rsoi-statistic
           heroku_email: nastya.sushina@yandex.ru
           usedocker: true
@@ -133,7 +133,7 @@ jobs:
       #     environment: backend/postman/[rsoi][heroku] postman_environment.json
       #     delayRequest: 100
       #     reporters: '[ "cli" ]'
-      #     envVar: '[{ "key":"serviceName", "value":"rsoi-loyalty" }, { "key":"herokuApiToken", "value":"d4b7dd87-55ec-44e7-8174-4bd38d1bd31a" }]'
+      #     envVar: '[{ "key":"serviceName", "value":"rsoi-loyalty" }, { "key":"herokuApiToken", "value":"08a9a492-dac1-4dea-a375-823e6e235ee6" }]'
 
       # - uses: education/autograding@v1
       #   id: autograder
