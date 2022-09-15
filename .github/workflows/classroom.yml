@@ -28,7 +28,7 @@ jobs:
       
       - name: build rent
         run: |
-          cd v2/reservation
+          cd backend/rent
           npm ci
           npm run build
 
@@ -39,12 +39,12 @@ jobs:
           heroku_app_name: rsoi-reservation
           heroku_email: nastya.sushina@yandex.ru
           usedocker: true
-          appdir: v2/reservation
+          appdir: backend/rent
         
 
       - name: build payment
         run: |
-          cd v2/payment
+          cd backend/payment
           npm ci
           npm run build
 
@@ -55,12 +55,12 @@ jobs:
           heroku_app_name: rsoi-payment
           heroku_email: nastya.sushina@yandex.ru
           usedocker: true
-          appdir: v2/payment
+          appdir: backend/payment
 
 
       - name: build gateway
         run: |
-          cd v2/gateway
+          cd backend/gateway
           npm ci
           npm run build
 
@@ -84,7 +84,7 @@ jobs:
         uses: akhileshns/heroku-deploy@v3.4.6
         with:
           heroku_api_key: d4b7dd87-55ec-44e7-8174-4bd38d1bd31a
-          heroku_app_name: rsoi-ansushina
+          heroku_app_name: rsoi-scooter
           heroku_email: nastya.sushina@yandex.ru
           usedocker: true
           appdir: backend/scooter
@@ -100,7 +100,7 @@ jobs:
         uses: akhileshns/heroku-deploy@v3.4.6
         with:
           heroku_api_key: d4b7dd87-55ec-44e7-8174-4bd38d1bd31a
-          heroku_app_name: rsoi-ansushina
+          heroku_app_name: rsoi-sessions
           heroku_email: nastya.sushina@yandex.ru
           usedocker: true
           appdir: backend/sessions
@@ -115,7 +115,7 @@ jobs:
         uses: akhileshns/heroku-deploy@v3.4.6
         with:
           heroku_api_key: d4b7dd87-55ec-44e7-8174-4bd38d1bd31a
-          heroku_app_name: rsoi-ansushina
+          heroku_app_name: rsoi-statistic
           heroku_email: nastya.sushina@yandex.ru
           usedocker: true
           appdir: backend/statistic
@@ -129,8 +129,8 @@ jobs:
       #   uses: matt-ball/newman-action@master
       #   with:
       #     # TODO insert your <Variant> and <ServiceName>
-      #     collection: v2/postman/[rsoi] postman_collection.json
-      #     environment: v2/postman/[rsoi][heroku] postman_environment.json
+      #     collection: backend/postman/[rsoi] postman_collection.json
+      #     environment: backend/postman/[rsoi][heroku] postman_environment.json
       #     delayRequest: 100
       #     reporters: '[ "cli" ]'
       #     envVar: '[{ "key":"serviceName", "value":"rsoi-loyalty" }, { "key":"herokuApiToken", "value":"d4b7dd87-55ec-44e7-8174-4bd38d1bd31a" }]'
