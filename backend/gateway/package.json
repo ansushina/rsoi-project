@@ -28,6 +28,7 @@
     "@nestjs/jwt": "^9.0.0",
     "@nestjs/platform-express": "^8.0.0",
     "@types/luxon": "^3.0.1",
+    "bull": "^3.29.3",
     "dotenv": "^16.0.1",
     "luxon": "^3.0.3",
     "moment": "^2.29.4",
