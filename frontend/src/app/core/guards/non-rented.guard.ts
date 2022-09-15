@@ -30,7 +30,7 @@ export class NonRentedGuard implements CanActivate {
         return true;
       }
     } catch {
-      return this.router.parseUrl('/')
+      return true;
     }
   }
 

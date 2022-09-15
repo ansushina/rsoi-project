@@ -25,7 +25,7 @@ private handleAuthError(err: HttpErrorResponse): Observable<any> {
         return of(err.message);
     }
     if (err.status === 403) {
-      this.router.navigateByUrl('/');
+      // this.router.navigateByUrl('/');
       return of(err.message);
     }
     return throwError(err);

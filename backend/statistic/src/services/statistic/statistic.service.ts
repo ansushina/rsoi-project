@@ -3,6 +3,7 @@ import { PgService } from 'src/postgres/postgres.service';
 
 
 import { Client } from 'pg';
+import { retry } from 'rxjs';
 
 @Injectable()
 export class StatisticService {
@@ -51,6 +52,7 @@ export class StatisticService {
         `;      
       try {
         const result = await this.pg.query(query);
+        return result;
       } catch (error) {
         console.log(error);
         throw new Error("Failed to insert ruser to table!");
@@ -65,6 +67,7 @@ export class StatisticService {
         `;      
       try {
         const result = await this.pg.query(query);
+        return result;
       } catch (error) {
         console.log(error);
         throw new Error("Failed to insert ruser to table!");

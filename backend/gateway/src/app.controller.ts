@@ -14,6 +14,8 @@ import * as moment from 'moment';
 import { Scooter } from './models/scooter';
 import { StatisticService } from './services/statistic/statistic.service';
 import { DateTime } from 'luxon';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Controller()
 export class AppController {
@@ -24,7 +26,7 @@ export class AppController {
     private readonly rent: RentService,
     private readonly payment: PaymentService,
     private readonly stats: StatisticService,
-    // @InjectQueue('queue1') private queue: Queue
+    @InjectQueue('queue1') private queue: Queue
   ) { }
 
   @Get()
@@ -343,7 +345,14 @@ export class AppController {
 
     //  создать оплату
 
-    const paymentDto = { payment_uid: uuidv4(), status: 'PAID', price: scooter.price } as Payment
+    
+    const from = DateTime.fromISO(r.start_date);
+    const to = DateTime.fromISO((new Date()).toISOString());
+    const duration = to.diff(from, 'minutes').minutes;
+
+    Logger.log(`${r.uid} ${duration.toString()}`)
+
+    const paymentDto = { payment_uid: uuidv4(), status: 'PAID', price: scooter.price * (1 + duration) } as Payment
 
     const payment = await this.payment.createPayment(session.user_uid, paymentDto);
 
@@ -361,14 +370,16 @@ export class AppController {
     if (!resultSU) {
       throw new InternalServerErrorException('Не удалось изменить статус самоката');
     }
-    Logger.log(rent.end_data);
-    Logger.log(rent.start_date);
-    const from = DateTime.fromISO(rent.start_date);
-    const to = DateTime.fromISO(rent.end_data);
-    const duration = to.diff(from, 'minutes').minutes;
 
-    Logger.log(`${rent.uid} ${duration.toString()}`)
-    await this.stats.sendRetnStats(rent.uid, duration.toString());
+
+    this.queue.add('job1',
+    {
+      try: 1, 
+      creationTime: Date.now(),
+      request: 'rent-stats', 
+      data: {rent_uid: rent.uid, duration: duration.toString()}
+    });
+    // await this.stats.sendRetnStats(rent.uid, duration.toString());
 
   }
 

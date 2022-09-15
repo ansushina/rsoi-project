@@ -34,6 +34,10 @@ export class RegisterPageComponent implements OnInit {
     if (!this.registerForm.valid) return;
 
     const formValue = this.registerForm.value;
+
+    if (formValue.password !== formValue.repeatPassword) {
+      this.snackBar.open('Пароли не совпадают!');
+    }
     try {
       const user = await lastValueFrom(this.auth.createUser({
         uid: uuidv4(),

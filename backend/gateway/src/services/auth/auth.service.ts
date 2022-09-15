@@ -16,7 +16,7 @@ export class AuthService {
     ) {}
 
     public async isUserTokenValid(token: string) {
-        const session = await this.getSessionByToken(token);
+        const session = await this.getSessionWithErrors(token);
         if (!session) return false;
         const user = await this.getUserById(session.user_uid);
         if (!user) return false;
@@ -26,6 +26,19 @@ export class AuthService {
         return user;
     }
 
+    public getSessionWithErrors(token: string) {
+        const url = this.path + '/sessions/' + token;
+
+        return lastValueFrom(this.http.get(url).pipe(
+            map(res => res.data),
+            catchError(e => {
+                if (e.response?.status && e.response?.status !== 500) {
+                    return of(null);
+                } 
+                throw new HttpException('Sessions service is not available', 500);
+            }))
+        );
+    }
 
     public getSessionByToken(token: string): Promise<Session> {
         const url = this.path + '/sessions/' + token;
